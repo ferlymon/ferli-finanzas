@@ -1,0 +1,8 @@
+{
+  "appId": "com.ferli.finanzas",
+  "appName": "Ferli Finanzas",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": false
+  }
+}

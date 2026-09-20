@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#123f4a">
+  <title>Ferli Finanzas</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <span class="eyebrow">Tu dinero, claro y en orden</span>
+      <h1>Ferli Finanzas</h1>
+    </div>
+    <button id="installBtn" class="icon-button hidden" aria-label="Instalar aplicación">Instalar</button>
+  </header>
+
+  <main id="app">
+    <section id="dashboard" class="view active">
+      <div class="period-row">
+        <label>Periodo <input id="periodPicker" type="month"></label>
+        <div class="segmented"><button data-period="month" class="active">Mes</button><button data-period="week">Semana</button></div>
+      </div>
+      <div id="summaryCards" class="cards"></div>
+      <article class="panel">
+        <div class="panel-head"><div><span class="eyebrow">Distribución</span><h2>Gastos por categoría</h2></div><span id="spentTotal" class="pill"></span></div>
+        <div id="categoryBars" class="bars"></div>
+      </article>
+      <article class="panel">
+        <div class="panel-head"><div><span class="eyebrow">Últimos registros</span><h2>Movimientos recientes</h2></div><button class="text-button" data-go="movimientos">Ver todos</button></div>
+        <div id="recentList" class="list"></div>
+      </article>
+    </section>
+
+    <section id="movimientos" class="view">
+      <div class="section-title"><div><span class="eyebrow">Registro diario</span><h2>Movimientos</h2></div><button class="primary" data-open="transaction">+ Agregar</button></div>
+      <div class="filters"><select id="typeFilter"><option value="">Todos los tipos</option><option>Ingreso</option><option>Gasto</option><option>Ahorro</option><option>Pago de deuda</option></select><input id="searchInput" placeholder="Buscar movimiento"></div>
+      <div id="movementList" class="list panel"></div>
+    </section>
+
+    <section id="deudas" class="view">
+      <div class="section-title"><div><span class="eyebrow">Avance real</span><h2>Mis deudas</h2></div><button class="primary" data-open="debt">+ Agregar</button></div>
+      <div id="debtCards" class="debt-grid"></div>
+    </section>
+
+    <section id="presupuesto" class="view">
+      <div class="section-title"><div><span class="eyebrow">Límites mensuales</span><h2>Presupuesto</h2></div></div>
+      <div id="budgetList" class="panel budget-list"></div>
+    </section>
+
+    <section id="ajustes" class="view">
+      <div class="section-title"><div><span class="eyebrow">Control y respaldo</span><h2>Datos y sincronización</h2></div></div>
+      <article class="panel setting-card"><div><h3>Nube</h3><p>El prototipo funciona de forma privada en este dispositivo. La cuenta y sincronización se activarán después de validar la app.</p></div><span class="status local">Local</span></article>
+      <article class="panel action-panel"><h3>Comenzar</h3><p>Puedes conservar los datos de ejemplo, borrarlos o importar un archivo existente.</p><div class="button-stack"><button id="clearDemo" class="secondary">Comenzar desde cero</button><button id="importBtn" class="secondary">Importar Excel o respaldo</button><input id="importFile" type="file" accept=".xlsx,.xls,.json" hidden></div></article>
+      <article class="panel action-panel"><h3>Respaldar</h3><p>Descarga un archivo compatible con Excel o una copia completa para restaurar la aplicación.</p><div class="button-stack"><button id="exportExcel" class="primary">Descargar Excel</button><button id="exportBackup" class="secondary">Descargar respaldo</button></div></article>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <button data-view="dashboard" class="active"><span>⌂</span>Inicio</button>
+    <button data-view="movimientos"><span>↕</span>Movimientos</button>
+    <button data-view="deudas"><span>✓</span>Deudas</button>
+    <button data-view="presupuesto"><span>◫</span>Presupuesto</button>
+    <button data-view="ajustes"><span>⚙</span>Ajustes</button>
+  </nav>
+
+  <dialog id="transactionDialog">
+    <form id="transactionForm" method="dialog">
+      <div class="dialog-head"><div><span class="eyebrow">Nuevo registro</span><h2>Agregar movimiento</h2></div><button type="button" class="close">×</button></div>
+      <label>Tipo<select name="type" required><option>Gasto</option><option>Ingreso</option><option>Ahorro</option><option>Pago de deuda</option></select></label>
+      <label>Fecha<input name="date" type="date" required></label>
+      <label>Categoría<select name="category" required></select></label>
+      <label>Descripción<input name="description" required placeholder="Ej. Supermercado"></label>
+      <label>Monto<input name="amount" type="number" min="0.01" step="0.01" required></label>
+      <label class="debt-field hidden">Deuda asociada<select name="debtId"></select></label>
+      <label>Notas<textarea name="notes" rows="2"></textarea></label>
+      <button class="primary wide" type="submit">Guardar movimiento</button>
+    </form>
+  </dialog>
+
+  <dialog id="debtDialog">
+    <form id="debtForm" method="dialog">
+      <div class="dialog-head"><div><span class="eyebrow">Nueva cuenta</span><h2>Agregar deuda</h2></div><button type="button" class="close">×</button></div>
+      <label>Nombre<input name="name" required placeholder="Ej. Tarjeta bancaria"></label>
+      <label>Saldo inicial<input name="initial" type="number" min="0.01" step="0.01" required></label>
+      <label>Pago mínimo<input name="minimum" type="number" min="0" step="0.01" value="0"></label>
+      <label>Fecha límite<input name="dueDate" type="date"></label>
+      <button class="primary wide" type="submit">Guardar deuda</button>
+    </form>
+  </dialog>
+
+  <div id="toast" role="status"></div>
+</body>
+</html>

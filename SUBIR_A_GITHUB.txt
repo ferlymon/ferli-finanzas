@@ -1,0 +1,13 @@
+FERLI FINANZAS - ARCHIVOS PARA CREAR EL APK
+
+1. Extrae este ZIP en tu computadora.
+2. Abre https://github.com/ferlymon/ferli-finanzas
+3. Pulsa Add file > Upload files.
+4. Arrastra TODO el contenido de la carpeta extraída, incluida la carpeta .github.
+5. Al final de la página pulsa Commit changes.
+6. Abre la pestaña Actions del repositorio.
+7. Espera a que "Crear APK de Ferli Finanzas" termine con una marca verde.
+8. Abre esa ejecución y descarga el archivo Ferli-Finanzas-APK.
+
+Nota: el APK es una versión de prueba. Android puede pedir permiso para instalar
+aplicaciones desconocidas. Los datos de la app se guardan localmente en el celular.
