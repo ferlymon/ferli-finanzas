@@ -8,7 +8,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="styles.css">
-  <script defer src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script defer src="native.js"></script>
   <script defer src="app.js"></script>
 </head>
 <body>
@@ -57,7 +57,7 @@
       <div class="section-title"><div><span class="eyebrow">Control y respaldo</span><h2>Datos y sincronización</h2></div></div>
       <article class="panel setting-card"><div><h3>Nube</h3><p>El prototipo funciona de forma privada en este dispositivo. La cuenta y sincronización se activarán después de validar la app.</p></div><span class="status local">Local</span></article>
       <article class="panel action-panel"><h3>Comenzar</h3><p>Puedes conservar los datos de ejemplo, borrarlos o importar un archivo existente.</p><div class="button-stack"><button id="clearDemo" class="secondary">Comenzar desde cero</button><button id="importBtn" class="secondary">Importar Excel o respaldo</button><input id="importFile" type="file" accept=".xlsx,.xls,.json" hidden></div></article>
-      <article class="panel action-panel"><h3>Respaldar</h3><p>Descarga un archivo compatible con Excel o una copia completa para restaurar la aplicación.</p><div class="button-stack"><button id="exportExcel" class="primary">Descargar Excel</button><button id="exportBackup" class="secondary">Descargar respaldo</button></div></article>
+      <article class="panel action-panel"><h3>Respaldar</h3><p>Descarga un archivo compatible con Excel o una copia completa para restaurar la aplicación.</p><div class="button-stack"><button id="exportExcel" class="primary">Guardar o compartir Excel</button><button id="exportBackup" class="secondary">Guardar o compartir respaldo</button></div></article>
     </section>
   </main>
 
