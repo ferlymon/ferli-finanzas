@@ -11,6 +11,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
@@ -34,28 +35,47 @@ jobs:
           SIGNING_KEY: ${{ secrets.FERLI_DEBUG_KEYSTORE_BASE64 }}
         run: |
           set -euo pipefail
+
           if [ -z "$SIGNING_KEY" ]; then
             echo 'Falta FERLI_DEBUG_KEYSTORE_BASE64.'
             exit 1
           fi
+
           umask 077
           printf '%s' "$SIGNING_KEY" | base64 --decode > "$RUNNER_TEMP/ferli-fixed.keystore"
-          keytool -exportcert -keystore "$RUNNER_TEMP/ferli-fixed.keystore" -storepass android -alias androiddebugkey -file "$RUNNER_TEMP/ferli-cert.der"
-          printf '%s  %s\n' '48be0ba5da12b0d3edfc1511a1d9977664284c4ae28620cc7dfe6d0dc4dca1ba' "$RUNNER_TEMP/ferli-cert.der" | sha256sum --check
+
+          keytool -exportcert \
+            -keystore "$RUNNER_TEMP/ferli-fixed.keystore" \
+            -storepass android \
+            -alias androiddebugkey \
+            -file "$RUNNER_TEMP/ferli-cert.der"
+
+          printf '%s  %s\n' \
+            '48be0ba5da12b0d3edfc1511a1d9977664284c4ae28620cc7dfe6d0dc4dca1ba' \
+            "$RUNNER_TEMP/ferli-cert.der" | sha256sum --check
 
       - name: Configurar version y firma
         env:
           BUILD_NUMBER: ${{ github.run_number }}
         run: |
           python3 - <<'PY'
-          import os, re
+          import os
+          import re
           from pathlib import Path
+
           p = Path('android/app/build.gradle')
           s = p.read_text()
           version = 1000 + int(os.environ['BUILD_NUMBER'])
-          s, count = re.subn(r'versionCode\s+\d+', f'versionCode {version}', s)
+
+          s, count = re.subn(
+              r'versionCode\s+\d+',
+              f'versionCode {version}',
+              s
+          )
+
           if count != 1:
               raise SystemExit('No se encontró versionCode único')
+
           s += """
           android {
               signingConfigs {
@@ -73,11 +93,13 @@ jobs:
               }
           }
           """
+
           p.write_text(s)
           PY
 
       - name: Compilar APK
         run: |
+          set -euo pipefail
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
@@ -85,22 +107,44 @@ jobs:
       - name: Verificar firma final de la APK
         run: |
           set -euo pipefail
+
           sdk_root="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
           tools_dir=$(find "$sdk_root/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -n 1)
-          "$tools_dir/apksigner" verify --verbose --print-certs android/app/build/outputs/apk/debug/app-debug.apk > "$RUNNER_TEMP/ferli-signature.txt"
+
+          "$tools_dir/apksigner" verify --verbose --print-certs \
+            android/app/build/outputs/apk/debug/app-debug.apk \
+            > "$RUNNER_TEMP/ferli-signature.txt"
+
           cat "$RUNNER_TEMP/ferli-signature.txt"
+
           python3 - <<'PY'
-          import os, re
+          import os
+          import re
           from pathlib import Path
-          text = Path(os.environ['RUNNER_TEMP'], 'ferli-signature.txt').read_text()
-          fingerprints = re.findall(r'Signer #\d+ certificate SHA-256 digest: ([0-9a-fA-F]+)', text)
+
+          text = Path(
+              os.environ['RUNNER_TEMP'],
+              'ferli-signature.txt'
+          ).read_text()
+
+          fingerprints = re.findall(
+              r'^.*\bcertificate SHA-256 digest:\s*([0-9a-fA-F]{64})\s*$',
+              text,
+              re.MULTILINE
+          )
+
           expected = '48be0ba5da12b0d3edfc1511a1d9977664284c4ae28620cc7dfe6d0dc4dca1ba'
-          if [s.lower() for s in fingerprints] != [expected]:
-              raise SystemExit('FIRMA INCORRECTA: no se entregará la APK')
+
+          if [value.lower() for value in fingerprints] != [expected]:
+              raise SystemExit(
+                  'FIRMA INCORRECTA: no se entregará la APK'
+              )
+
           print('Firma fija de Ferli verificada correctamente')
           PY
 
-      - uses: actions/upload-artifact@v4
+      - name: Entregar APK
+        uses: actions/upload-artifact@v4
         with:
           name: Ferli-Finanzas-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
@@ -109,4 +153,6 @@ jobs:
 
       - name: Eliminar clave temporal
         if: always()
-        run: rm -f "$RUNNER_TEMP/ferli-fixed.keystore" "$RUNNER_TEMP/ferli-cert.der"
+        run: |
+          rm -f "$RUNNER_TEMP/ferli-fixed.keystore"
+          rm -f "$RUNNER_TEMP/ferli-cert.der"
