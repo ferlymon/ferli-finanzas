@@ -5,7 +5,7 @@ const CATEGORY_OPTIONS={
  'Ahorro':['Fondo de emergencia','Meta de ahorro','Ahorro e inversión'],
  'Pago de deuda':['Deudas']
 };
-const today=new Date();const iso=d=>d.toISOString().slice(0,10);const money=n=>new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN'}).format(Number(n)||0);
+const today=new Date();const iso=d=>[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');const money=n=>new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN'}).format(Number(n)||0);
 const seed={transactions:[
  {id:1,date:iso(new Date(today.getFullYear(),today.getMonth(),1)),type:'Ingreso',category:'Otros gastos',description:'Ingreso quincenal',amount:6300,notes:''},
  {id:2,date:iso(new Date(today.getFullYear(),today.getMonth(),3)),type:'Gasto',category:'Alimentación',description:'Supermercado',amount:840,notes:''},
@@ -101,3 +101,4 @@ function validateBackup(value){
  for(const t of value.transactions)if(!t||!t.id||typeof t.date!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(t.date)||typeof t.description!=='string'||!['Ingreso','Gasto','Ahorro','Pago de deuda'].includes(t.type)||!Number.isFinite(Number(t.amount))||Number(t.amount)<=0)throw new Error('El respaldo contiene movimientos inválidos.');
  for(const d of value.debts)if(!d||!d.id||typeof d.name!=='string'||!Number.isFinite(Number(d.initial))||Number(d.initial)<=0)throw new Error('El respaldo contiene deudas inválidas.');
 }
+

@@ -16,6 +16,7 @@
     "esbuild": "^0.25.0"
   },
   "scripts": {
-    "postinstall": "esbuild native.js --bundle --outfile=www/native.js --format=iife"
+    "postinstall": "esbuild native.js --bundle --outfile=www/native.js --format=iife",
+    "capacitor:copy:after": "node scripts/android-icon.cjs"
   }
 }
